@@ -4,7 +4,8 @@ set -euo pipefail
 MODE="${1:-run}"
 APP_NAME="NoNap"
 BUNDLE_ID="app.nonap.NoNap"
-MIN_SYSTEM_VERSION="12.0"
+MIN_SYSTEM_VERSION="26.0"
+VERSION="2.0"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_DIR="$ROOT_DIR/outputs"
@@ -37,6 +38,10 @@ cat >"$INFO_PLIST" <<PLIST
   <string>NoNap</string>
   <key>CFBundleDisplayName</key>
   <string>NoNap</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$VERSION</string>
+  <key>CFBundleVersion</key>
+  <string>$VERSION</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>LSMinimumSystemVersion</key>
@@ -50,6 +55,10 @@ cat >"$INFO_PLIST" <<PLIST
 PLIST
 
 /usr/bin/codesign --force --deep --sign - "$APP_BUNDLE" >/dev/null 2>&1 || true
+
+if [[ "$MODE" == "--build-only" ]]; then
+  exit 0
+fi
 
 open_app() {
   /usr/bin/open -n "$APP_BUNDLE"
@@ -76,7 +85,7 @@ case "$MODE" in
     pgrep -x "$APP_NAME" >/dev/null
     ;;
   *)
-    echo "usage: $0 [run|--debug|--logs|--telemetry|--verify]" >&2
+    echo "usage: $0 [run|--build-only|--debug|--logs|--telemetry|--verify]" >&2
     exit 2
     ;;
 esac
